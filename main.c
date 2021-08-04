@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
+#include "utils.h"
 
 int read_name_of_file(int argc, char **argv, int *index, char **out_name)
 {
@@ -22,7 +23,7 @@ int read_name_of_file(int argc, char **argv, int *index, char **out_name)
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        puts("Неверное количество параметров");
+        puts("Invalid number of parameters");
         return 1;
     }
     char *name_o = NULL, *name_f = NULL;
@@ -33,7 +34,7 @@ int main(int argc, char **argv) {
     {
         if(size > 0 && name_f != NULL)
         {
-            puts("Ввод серверов невозможен одновременно из файла и консоли");
+            puts("Data entry is not possible from file and console at the same time");
             free(mas);
             return 1;
         }
@@ -57,7 +58,15 @@ int main(int argc, char **argv) {
         size++;
     }
     for (int i = 0; i < size; i++)
-        printf("%s\n", mas[i]);
+        scan_server(mas[i]);
+    if(name_f)
+    {
+        puts("The function of reading from a file is not implemented");
+    }
+    if(name_o)
+    {
+        puts("The function of writing in file is not implemented");
+    }
     free(mas);
     return 0;
 }
