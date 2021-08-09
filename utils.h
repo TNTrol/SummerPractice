@@ -1,32 +1,32 @@
-
-
-#ifdef __cplusplus
-extern "C" {                 // Make sure we have C-declarations in C++ programs
-#endif
-
 #ifndef UTILS_H
 #define UTILS_H
-#define DEBUG
-#include <sys/socket.h>
-#include <resolv.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <string.h>
 
-#include <openssl/bio.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <openssl/pem.h>
-#include <openssl/x509.h>
-#include <openssl/x509_vfy.h>
-#include <unistd.h>
+struct  options{
+    char *file_o, *file_f;
+    char **servers;
+    int size;
+};
 
-int create_socket(char url_str[], BIO *out);
-int scan_server(char url_str[]);
+struct report{
+    int length;
+    char *target;
+    char *min_cipher, *max_cipher;
+    char *min_version, *max_version;
+};
 
-#if defined(__cplusplus)
-}
-#endif
+typedef struct report Report;
+typedef struct options Options;
+//
+//void free_options(struct options *options);
+//
+//inline void free_options(struct options *options)
+//{
+//    if(options->file_o)
+//        free(options->file_o);
+//    if(options->file_f)
+//        free(options->file_f);
+//    if(options->servers)
+//        free(options->servers);
+//}
 
 #endif

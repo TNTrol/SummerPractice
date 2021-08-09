@@ -1,7 +1,10 @@
+//#define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
+#include "scanner.h"
 #include "utils.h"
+#include <unistd.h>
 
 int read_name_of_file(int argc, char **argv, int *index, char **out_name)
 {
@@ -26,47 +29,70 @@ int main(int argc, char **argv) {
         puts("Invalid number of parameters");
         return 1;
     }
-    char *name_o = NULL, *name_f = NULL;
-    char **mas = (char **)malloc(sizeof(char *) * (argc - 1));
-    int size = 0;
+    Options op = {.file_f = NULL, .size = 0, .file_o = 0, .servers = NULL};
+    int result = 0;
+    char **out;
 
     for(int i = 1; i < argc; i++)
     {
-        if(size > 0 && name_f != NULL)
-        {
-            puts("Data entry is not possible from file and console at the same time");
-            free(mas);
-            return 1;
-        }
         if(strcmp(argv[i], "-f") == 0)
         {
-            if(read_name_of_file(argc, argv, &i, &name_f)){
-                free(mas);
-                return 1;
+            puts("ok2");
+            if(read_name_of_file(argc, argv, &i, &op.file_f)){
+                result = -1;
+                goto free_;
             }
-            continue;
         }
-        if(strcmp(argv[i], "-o") == 0)
+        else if(strcmp(argv[i], "-o") == 0)
         {
-            if(read_name_of_file(argc, argv, &i, &name_o)) {
-                free(mas);
-                return 1;
+            if(read_name_of_file(argc, argv, &i, &op.file_o)) {
+                result = -1;
+                goto free_;
             }
-            continue;
         }
-        mas[size] = argv[i];
-        size++;
+        else {
+            if(!op.servers)
+                op.servers = argv + 1;
+            op.size++;
+        }
+        if(op.size > 0 && op.file_f)
+        {
+            puts("Data entry is not possible from file and console at the same time");
+            goto free_;
+        }
     }
-    for (int i = 0; i < size; i++)
-        scan_server(mas[i]);
-    if(name_f)
+
+    if(op.file_f)
     {
-        puts("The function of reading from a file is not implemented");
+        FILE *fp = NULL;
+        char *line = NULL;
+        size_t len = 0;
+        ssize_t read;
+        fp = fopen(op.file_f, "r");
+        if (fp == NULL)
+        {
+            puts("Error in open file");
+            goto free_;
+        }
+        while ((read = getline(&line, &len, fp)) != -1) {
+            if(read <= 2)
+                continue;
+            if(line[read - 1] == '\n')
+                line[read - 1] = 0;
+            scan_server(line);
+        }
+        free(line);
     }
-    if(name_o)
+    else
+    {
+        for (int i = 0; i < op.size; i++ )
+            scan_server_2( *(op.servers + i) );
+    }
+
+    if(op.file_o)
     {
         puts("The function of writing in file is not implemented");
     }
-    free(mas);
-    return 0;
+    free_:
+    return result;
 }
