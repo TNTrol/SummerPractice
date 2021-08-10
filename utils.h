@@ -1,6 +1,13 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+struct cipher{
+    char *version;
+    char *name;
+};
+
+typedef struct cipher Cipher;
+
 struct  options{
     char *file_o, *file_f;
     char **servers;
@@ -12,6 +19,12 @@ struct report{
     char *target;
     char *min_cipher, *max_cipher;
     char *min_version, *max_version;
+    Cipher ciphers[2];
+};
+
+enum Version{
+    MIN = 0,
+    MAX = 1
 };
 
 typedef struct report Report;

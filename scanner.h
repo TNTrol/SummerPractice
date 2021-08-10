@@ -21,10 +21,11 @@ extern "C" {                 // Make sure we have C-declarations in C++ programs
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
 #include <unistd.h>
+#include "utils.h"
 
-int create_socket(char url_str[], BIO *out);
-int scan_server(char url_str[]);
-int scan_server_2(char url_str[]);
+static const int versions[3] = {TLS1_1_VERSION, TLS1_2_VERSION, TLS1_3_VERSION};
+int create_socket(char url_str[], char **out);
+int scan_server(char url_str[], void (*print) (Report *));
 
 #if defined(__cplusplus)
 }

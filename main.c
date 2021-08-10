@@ -6,6 +6,11 @@
 #include "utils.h"
 #include <unistd.h>
 
+void print(Report *report)
+{
+    printf("Target: %s\nLength: %d\nMinimal version:\n Cipher: %s, Version: %s\nMaximal version:\n Cipher: %s, Version: %s\n", report->target, report->length, report->ciphers[0].name, report->ciphers[0].version, report->ciphers[1].name, report->ciphers[1].version);
+}
+
 int read_name_of_file(int argc, char **argv, int *index, char **out_name)
 {
     (*index)++;
@@ -37,7 +42,6 @@ int main(int argc, char **argv) {
     {
         if(strcmp(argv[i], "-f") == 0)
         {
-            puts("ok2");
             if(read_name_of_file(argc, argv, &i, &op.file_f)){
                 result = -1;
                 goto free_;
@@ -79,14 +83,14 @@ int main(int argc, char **argv) {
                 continue;
             if(line[read - 1] == '\n')
                 line[read - 1] = 0;
-            scan_server(line);
+            scan_server(line, print);
         }
         free(line);
     }
     else
     {
         for (int i = 0; i < op.size; i++ )
-            scan_server_2( *(op.servers + i) );
+            scan_server( *(op.servers + i), print);
     }
 
     if(op.file_o)
