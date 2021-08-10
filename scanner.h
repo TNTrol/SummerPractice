@@ -6,7 +6,7 @@ extern "C" {                 // Make sure we have C-declarations in C++ programs
 
 #ifndef SCANNER_H
 #define SCANNER_H
-#define DEBUG
+//#define DEBUG
 #include <sys/socket.h>
 #include <resolv.h>
 #include <netdb.h>
@@ -23,9 +23,9 @@ extern "C" {                 // Make sure we have C-declarations in C++ programs
 #include <unistd.h>
 #include "utils.h"
 
-static const int versions[3] = {TLS1_1_VERSION, TLS1_2_VERSION, TLS1_3_VERSION};
+static const int Versions[3] = {TLS1_1_VERSION, TLS1_2_VERSION, TLS1_3_VERSION};
 int create_socket(char url_str[], char **out);
-int scan_server(char url_str[], void (*print) (Report *));
+Report * scan_server(char url_str[]);
 
 #if defined(__cplusplus)
 }

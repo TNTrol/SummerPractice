@@ -4,11 +4,20 @@
 #include <stdlib.h>
 #include "scanner.h"
 #include "utils.h"
-#include <unistd.h>
 
 void print(Report *report)
 {
-    printf("Target: %s\nLength: %d\nMinimal version:\n Cipher: %s, Version: %s\nMaximal version:\n Cipher: %s, Version: %s\n", report->target, report->length, report->ciphers[0].name, report->ciphers[0].version, report->ciphers[1].name, report->ciphers[1].version);
+    puts("___________Report__________");
+    printf("Target: %s\n"
+           "Length: %d\n"
+           "Minimal version:"
+           "\n Cipher: %s, Version: %s\n"
+           "Maximal version:\n "
+           "Cipher: %s, Version: %s\n",
+           report->target,
+           report->tls_min_version.length,
+           report->tls_min_version.name, report->tls_min_version.version,
+           report->tls_max_version.name, report->tls_max_version.version );
 }
 
 int read_name_of_file(int argc, char **argv, int *index, char **out_name)
@@ -17,12 +26,12 @@ int read_name_of_file(int argc, char **argv, int *index, char **out_name)
     int i = *index;
     if(*out_name)
     {
-        puts("Такой аргумент уже есть");
+        puts("This argument already exists");
         return 1;
     }
     if(argc <= i)
     {
-        puts("Ожидалось название файла");
+        puts("File name expected");
         return 1;
     }
     *out_name = argv[i];
@@ -37,6 +46,8 @@ int main(int argc, char **argv) {
     Options op = {.file_f = NULL, .size = 0, .file_o = 0, .servers = NULL};
     int result = 0;
     char **out;
+    int size = 0;
+    Report **reports;
 
     for(int i = 1; i < argc; i++)
     {
@@ -83,20 +94,58 @@ int main(int argc, char **argv) {
                 continue;
             if(line[read - 1] == '\n')
                 line[read - 1] = 0;
-            scan_server(line, print);
+            Report *report = scan_server(line);
+            if(report)
+            {
+                print(report);
+                free(report);
+            }
         }
         free(line);
-    }
-    else
-    {
+        fclose(fp);
+    }else{
+        reports = malloc(op.size * sizeof(Report *));
+        puts("Start scanning...");
         for (int i = 0; i < op.size; i++ )
-            scan_server( *(op.servers + i), print);
+        {
+            Report *report = scan_server(*(op.servers + i));
+            if(report)
+            {
+                reports[size] = report;
+                size++;
+            }
+            printf("%d of %d\n", i + 1, op.size);
+        }
     }
 
     if(op.file_o)
     {
-        puts("The function of writing in file is not implemented");
+        FILE *fp;
+        size_t count;
+        fp = freopen(op.file_o, "wb", stdout);
+        if(fp == NULL) {
+            puts("Error in open file");
+            goto free_;
+        }
+        for(int i = 0; i < size; i++)
+        {
+            print(reports[i]);
+        }
+        fclose(fp);
+    }else
+    {
+        for(int i = 0; i < size; i++)
+        {
+            print(reports[i]);
+        }
     }
+
     free_:
+    if(reports) {
+        for (int i = 0; i < size; i++)
+            if (reports[i])
+                free(reports[i]);
+        free(reports);
+    }
     return result;
 }

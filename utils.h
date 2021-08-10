@@ -1,9 +1,12 @@
 #ifndef UTILS_H
 #define UTILS_H
+#include <stdio.h>
+#include <stdlib.h>
 
 struct cipher{
-    char *version;
-    char *name;
+    const char *version;
+    const char *name;
+    int length;
 };
 
 typedef struct cipher Cipher;
@@ -15,11 +18,9 @@ struct  options{
 };
 
 struct report{
-    int length;
-    char *target;
-    char *min_cipher, *max_cipher;
-    char *min_version, *max_version;
-    Cipher ciphers[2];
+    const char *target;
+    Cipher tls_max_version;
+    Cipher tls_min_version;
 };
 
 enum Version{
@@ -27,12 +28,30 @@ enum Version{
     MAX = 1
 };
 
+enum ResultScanning{
+    NOT_FOUND_SERVER = 0,
+    DONT_SUPPORT_VERSION_SSL = -1,
+    SUCCESS = 1,
+    ERROR = -2
+};
+
 typedef struct report Report;
 typedef struct options Options;
-//
-//void free_options(struct options *options);
-//
-//inline void free_options(struct options *options)
+
+static inline Report * create_report()
+{
+    Report *report= malloc (sizeof (Report));
+    report->target = NULL;
+    report->tls_min_version.length = 0;
+    report->tls_min_version.name = NULL;
+    report->tls_min_version.version = NULL;
+    report->tls_max_version.length = 0;
+    report->tls_max_version.name = NULL;
+    report->tls_max_version.version = NULL;
+    return report;
+}
+
+//static inline void free_options(struct options *options)
 //{
 //    if(options->file_o)
 //        free(options->file_o);
