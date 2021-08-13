@@ -172,7 +172,7 @@ Report *scan_server(char *url_str)
     char *err = NULL;
     if(scan_server_report(url_str, report, &err) < 0){
         printf( "Target: %s.\n Error: %s", url_str, err);
-        free(err); //падает
+        //free(err); //падает
         free(report);
         return NULL;
     }

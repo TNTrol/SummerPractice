@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
             print(reports[i]);
         }
         fclose(fp);
-    }else
+    }else if (! op.file_f)
     {
         for(int i = 0; i < size; i++)
         {
