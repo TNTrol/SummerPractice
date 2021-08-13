@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "scanner.h"
 #include "utils.h"
+#define SIZE 10
 
 void print(Report *report)
 {
@@ -43,11 +44,11 @@ int main(int argc, char **argv) {
         puts("Invalid number of parameters");
         return 1;
     }
-    Options op = {.file_f = NULL, .size = 0, .file_o = 0, .servers = NULL};
+    Options op = {.file_f = NULL, .size = 0, .file_o = NULL, .servers = NULL};
     int result = 0;
-    char **out;
     int size = 0;
-    Report **reports;
+    int max_size = SIZE;
+    Report **reports = NULL;
 
     for(int i = 1; i < argc; i++)
     {
@@ -89,6 +90,7 @@ int main(int argc, char **argv) {
             puts("Error in open file");
             goto free_;
         }
+        reports = malloc(max_size * sizeof(Report *));
         while ((read = getline(&line, &len, fp)) != -1) {
             if(read <= 2)
                 continue;
@@ -97,11 +99,18 @@ int main(int argc, char **argv) {
             Report *report = scan_server(line);
             if(report)
             {
-                print(report);
-                free(report);
+                if(max_size <= size)
+                {
+                    max_size *= 2;
+                    reports = realloc(reports, max_size * sizeof (Report*));
+                }
+                reports[size] = report;
+                size++;
+            }else
+            {
+                free(line);
             }
         }
-        free(line);
         fclose(fp);
     }else{
         reports = malloc(op.size * sizeof(Report *));
