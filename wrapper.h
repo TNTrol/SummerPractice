@@ -7,6 +7,6 @@
 #include "utils.h"
 
 void scanning_server_wrapper(char *url, void(*callback) (Report *report));
-//void print(Report)
+//void printReport(Report)
 
 #endif //SUMMERPRACTICE_WRAPPER_H

@@ -6,7 +6,7 @@
 #include "utils.h"
 #define SIZE 10
 
-void print(Report *report)
+void printReport(Report *report)
 {
     puts("___________Report__________");
     printf("Target: %s\n"
@@ -19,6 +19,14 @@ void print(Report *report)
            report->tls_min_version.length,
            report->tls_min_version.name, report->tls_min_version.version,
            report->tls_max_version.name, report->tls_max_version.version );
+}
+
+void printReports(Report **reports, int size)
+{
+    for(int i = 0; i < size; i++)
+    {
+        printReport(reports[i]);
+    }
 }
 
 int read_name_of_file(int argc, char **argv, int *index, char **out_name)
@@ -49,6 +57,7 @@ int main(int argc, char **argv) {
     int size = 0;
     int max_size = SIZE;
     Report **reports = NULL;
+    FILE *fp = NULL;
 
     for(int i = 1; i < argc; i++)
     {
@@ -68,7 +77,7 @@ int main(int argc, char **argv) {
         }
         else {
             if(!op.servers)
-                op.servers = argv + 1;
+                op.servers = argv + i;
             op.size++;
         }
         if(op.size > 0 && op.file_f)
@@ -78,81 +87,68 @@ int main(int argc, char **argv) {
         }
     }
 
-    if(op.file_f)
-    {
-        FILE *fp = NULL;
+    if(op.file_f) {
         char *line = NULL;
         size_t len = 0;
         ssize_t read;
         fp = fopen(op.file_f, "r");
-        if (fp == NULL)
-        {
-            puts("Error in open file");
+        if (fp == NULL) {
+            printf("Error in open file %s", op.file_f);
             goto free_;
         }
-        reports = malloc(max_size * sizeof(Report *));
+        op.servers = malloc(sizeof(char *) * max_size);
         while ((read = getline(&line, &len, fp)) != -1) {
-            if(read <= 2)
+            if (read <= 2)
                 continue;
-            if(line[read - 1] == '\n')
+            if (line[read - 1] == '\n')
                 line[read - 1] = 0;
-            Report *report = scan_server(line);
-            if(report)
-            {
-                if(max_size <= size)
-                {
-                    max_size *= 2;
-                    reports = realloc(reports, max_size * sizeof (Report*));
-                }
-                reports[size] = report;
-                size++;
-            }else
-            {
-                free(line);
+            if (max_size <= op.size) {
+                max_size *= 2;
+                op.servers = realloc(op.servers, max_size * sizeof(char *));
             }
+            op.servers[op.size] = line;
+            op.size++;
+            line = NULL;
         }
         fclose(fp);
-    }else{
-        reports = malloc(op.size * sizeof(Report *));
-        puts("Start scanning...");
-        for (int i = 0; i < op.size; i++ )
+    }
+
+    reports = malloc(op.size * sizeof(Report *));
+    puts("Start scanning...");
+    for (int i = 0; i < op.size; i++ )
+    {
+        Report *report = scan_server(*(op.servers + i));
+        if(report)
         {
-            Report *report = scan_server(*(op.servers + i));
-            if(report)
-            {
-                reports[size] = report;
-                size++;
-            }
-            printf("%d of %d\n", i + 1, op.size);
+            reports[size] = report;
+            size++;
         }
+        printf("%d of %d\n", i + 1, op.size);
     }
 
     if(op.file_o)
     {
-        FILE *fp;
-        size_t count;
         fp = freopen(op.file_o, "wb", stdout);
         if(fp == NULL) {
-            puts("Error in open file");
+            printf("Error in open file %s", op.file_o);
             goto free_;
         }
-        for(int i = 0; i < size; i++)
-        {
-            print(reports[i]);
-        }
+        printReports(reports, size);
         fclose(fp);
-    }else if (! op.file_f)
+    }else
     {
-        for(int i = 0; i < size; i++)
-        {
-            print(reports[i]);
-        }
+        printReports(reports, size);
     }
 
     free_:
+    if(op.file_f)
+    {
+        for(int i = 0; i < op.size; i++)
+            free(op.servers[i]);
+        free(op.servers);
+    }
     if(reports) {
         for (int i = 0; i < size; i++)
-            if (reports[i])
                 free(reports[i]);
         free(reports);
     }
