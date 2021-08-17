@@ -24,14 +24,16 @@ struct report{
     Cipher tls_min_version;
 };
 
-struct thread_arg{
+struct const_for_thread{
     pthread_mutex_t mutex;
-    void *data;
-};
-
-struct report_arg{
     struct report **reports;
     int size;
+    int count;
+};
+
+struct thread_arg{
+    char *url;
+    struct const_for_thread *thread_data;
 };
 
 enum ResultScanning{
@@ -41,10 +43,13 @@ enum ResultScanning{
     ERROR = -2
 };
 
+typedef struct thread_scanning_data ScanningData;
+typedef struct report_data ReportData;
+
 typedef struct report Report;
 typedef struct options Options;
 typedef struct thread_arg ThreadArg;
-typedef struct report_arg ReportArg;
+typedef struct const_for_thread ThreadConst;
 
 static inline Report * create_report()
 {

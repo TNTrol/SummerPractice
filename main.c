@@ -4,12 +4,8 @@
 #include <stdlib.h>
 #include "scanner.h"
 #include "utils.h"
-#include <pthread.h>
+#include "visiting_servers.h"
 #define SIZE 10
-
-static int counter = 0, size_s = 0, curr_i = 0;
-pthread_mutex_t mutex;
-static Report **reports_s;
 
 void printReport(Report *report)
 {
@@ -32,26 +28,6 @@ void printReports(Report **reports, int size)
     {
         printReport(reports[i]);
     }
-}
-
-void finish_scanning(Report *report)
-{
-    pthread_mutex_lock(&mutex);
-    printf("%d of %d\n", curr_i + 1, size_s);
-    curr_i++;
-    if(report) {
-        reports_s[counter] = report;
-        counter++;
-    }
-    pthread_mutex_unlock(&mutex);
-}
-
-void* thread_func(void *argv)
-{
-    char *url = (char *) argv;
-    Report *report = scan_server(url);
-    finish_scanning(report);
-    return NULL;
 }
 
 int read_name_of_file(int argc, char **argv, int *index, char **out_name)
@@ -139,20 +115,8 @@ int main(int argc, char **argv) {
         fclose(fp);
     }
 
-    reports_s = malloc(op.size * sizeof(Report *));
-    pthread_t* threads = malloc(op.size * sizeof (pthread_t));
-    pthread_mutex_init(&mutex, NULL);
-    puts("Start scanning...");
-    size_s = op.size;
-    for (int i = 0; i < op.size; i++ )
-    {
-        pthread_create(&threads[i], NULL, thread_func, *(op.servers + i));
-    }
-
-    for (int i = 0; i < op.size; i++ )
-    {
-        pthread_join(threads[i], NULL);
-    }
+    reports = malloc(op.size * sizeof(Report *));
+    size = threading_visit(op.size, op.servers, reports);
 
     if(op.file_o)
     {
@@ -162,11 +126,11 @@ int main(int argc, char **argv) {
             result = -1;
             goto free_;
         }
-        printReports(reports_s, size_s);
+        printReports(reports, size);
         fclose(fp);
     }else
     {
-        printReports(reports_s, size_s);
+        printReports(reports, size);
     }
 
     free_:
@@ -176,12 +140,10 @@ int main(int argc, char **argv) {
             free(op.servers[i]);
         free(op.servers);
     }
-    pthread_mutex_destroy(&mutex);
-    free(threads);
-    if(reports_s) {
+    if(reports) {
         for (int i = 0; i < size; i++)
-                free(reports_s[i]);
-        free(reports_s);
+                free(reports[i]);
+        free(reports);
     }
     return result;
 }

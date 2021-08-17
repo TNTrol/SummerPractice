@@ -1,15 +1,15 @@
 ___________Report__________
+Target: https://metanit.com
+Length: 256
+Minimal version:
+ Cipher: ECDHE-RSA-AES256-SHA, Version: TLSv1.1
+Maximal version:
+ Cipher: ECDHE-RSA-AES256-GCM-SHA384, Version: TLSv1.2
+___________Report__________
 Target: https://www.vk.com
 Length: 256
 Minimal version:
  Cipher: ECDHE-ECDSA-AES128-SHA, Version: TLSv1.1
-Maximal version:
- Cipher: TLS_AES_256_GCM_SHA384, Version: TLSv1.3
-___________Report__________
-Target: https://www.youtube.com
-Length: 256
-Minimal version:
- Cipher: ECDHE-RSA-AES128-SHA, Version: TLSv1.1
 Maximal version:
  Cipher: TLS_AES_256_GCM_SHA384, Version: TLSv1.3
 ___________Report__________
@@ -20,19 +20,19 @@ Minimal version:
 Maximal version:
  Cipher: ECDHE-RSA-AES256-GCM-SHA384, Version: TLSv1.2
 ___________Report__________
+Target: https://www.youtube.com
+Length: 256
+Minimal version:
+ Cipher: ECDHE-RSA-AES128-SHA, Version: TLSv1.1
+Maximal version:
+ Cipher: TLS_AES_256_GCM_SHA384, Version: TLSv1.3
+___________Report__________
 Target: https://github.com
 Length: 256
 Minimal version:
  Cipher: ECDHE-ECDSA-AES128-GCM-SHA256, Version: TLSv1.2
 Maximal version:
  Cipher: TLS_AES_128_GCM_SHA256, Version: TLSv1.3
-___________Report__________
-Target: https://en.dsr-corporation.com
-Length: 256
-Minimal version:
- Cipher: ECDHE-RSA-AES256-SHA, Version: TLSv1.1
-Maximal version:
- Cipher: TLS_AES_256_GCM_SHA384, Version: TLSv1.3
 ___________Report__________
 Target: https://www.dsr.com
 Length: 256

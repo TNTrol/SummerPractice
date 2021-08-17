@@ -7,7 +7,7 @@
 
 #include "utils.h"
 
-void threading_visit();
-void serial_visit();
+int threading_visit(int size, char **urls, Report **out_reports);
+int serial_visit(int size, char **urls, Report **out_reports);
 
-#endif //SUMMERPRACTICE_VISITING_SERVERS_H
+#endif //SUMMER_PRACTICE_VISITING_SERVERS_H
