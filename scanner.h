@@ -26,6 +26,7 @@ extern "C" {                 // Make sure we have C-declarations in C++ programs
 static const int Versions[3] = {TLS1_1_VERSION, TLS1_2_VERSION, TLS1_3_VERSION};
 int create_socket(char url_str[], char **out);
 Report * scan_server(char url_str[]);
+Report * scan_server_with_error(char url_str[], char **err);
 
 #if defined(__cplusplus)
 }

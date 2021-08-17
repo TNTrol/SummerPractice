@@ -3,9 +3,10 @@ project(SummerPractice C)
 
 set(CMAKE_C_STANDARD 99)
 find_package(OpenSSL REQUIRED)
-    add_executable(SummerPractice main.c scanner.c scanner.h utils.h wrapper.c wrapper.h)
+    add_executable(SummerPractice main.c scanner.c scanner.h utils.h wrapper.c wrapper.h visiting_servers.c visiting_servers.h)
 
 #target_link_libraries(${PROJECT_NAME} PUBLIC ssl crypto )
+TARGET_LINK_LIBRARIES( SummerPractice pthread)
 
 find_package(OpenSSL REQUIRED)
 if (OPENSSL_FOUND)
@@ -15,3 +16,4 @@ if (OPENSSL_FOUND)
 else()
     message(STATUS "OpenSSL Not Found")
 endif()
+

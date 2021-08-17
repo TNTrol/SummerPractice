@@ -2,6 +2,7 @@
 #define UTILS_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 struct cipher{
     const char *version;
@@ -23,9 +24,14 @@ struct report{
     Cipher tls_min_version;
 };
 
-enum Version{
-    MIN = 0,
-    MAX = 1
+struct thread_arg{
+    pthread_mutex_t mutex;
+    void *data;
+};
+
+struct report_arg{
+    struct report **reports;
+    int size;
 };
 
 enum ResultScanning{
@@ -37,6 +43,8 @@ enum ResultScanning{
 
 typedef struct report Report;
 typedef struct options Options;
+typedef struct thread_arg ThreadArg;
+typedef struct report_arg ReportArg;
 
 static inline Report * create_report()
 {

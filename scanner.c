@@ -86,6 +86,8 @@ int scan_server_version(char *dest_url, int version, Cipher *cipher, char **err_
     }
     EVP_PKEY *public_key = X509_get_pubkey(cert);
     const SSL_CIPHER *chipher = SSL_get_current_cipher(ssl);
+    //SSL_get_client_ciphers(ssl);
+    //SSL_get_ciphers(ssl);
     cipher->version = SSL_get_version(ssl);
     cipher->name = SSL_CIPHER_get_name(chipher);
 
@@ -168,10 +170,20 @@ int scan_server_report(char *dest_url, Report *report, char **err_msg)
 
 Report *scan_server(char *url_str)
 {
-    Report *report  = create_report();
     char *err = NULL;
-    if(scan_server_report(url_str, report, &err) < 0){
+    Report *report  = scan_server_with_error(url_str, &err);
+    if(!report){
         printf( "Target: %s.\n Error: %s", url_str, err);
+        free(report);
+        return NULL;
+    }
+    return report;
+}
+
+Report * scan_server_with_error(char url_str[], char **err)
+{
+    Report *report  = create_report();
+    if(scan_server_report(url_str, report, err) < 0){
         //free(err); //падает
         free(report);
         return NULL;

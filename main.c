@@ -4,7 +4,12 @@
 #include <stdlib.h>
 #include "scanner.h"
 #include "utils.h"
+#include <pthread.h>
 #define SIZE 10
+
+static int counter = 0, size_s = 0, curr_i = 0;
+pthread_mutex_t mutex;
+static Report **reports_s;
 
 void printReport(Report *report)
 {
@@ -27,6 +32,26 @@ void printReports(Report **reports, int size)
     {
         printReport(reports[i]);
     }
+}
+
+void finish_scanning(Report *report)
+{
+    pthread_mutex_lock(&mutex);
+    printf("%d of %d\n", curr_i + 1, size_s);
+    curr_i++;
+    if(report) {
+        reports_s[counter] = report;
+        counter++;
+    }
+    pthread_mutex_unlock(&mutex);
+}
+
+void* thread_func(void *argv)
+{
+    char *url = (char *) argv;
+    Report *report = scan_server(url);
+    finish_scanning(report);
+    return NULL;
 }
 
 int read_name_of_file(int argc, char **argv, int *index, char **out_name)
@@ -94,6 +119,7 @@ int main(int argc, char **argv) {
         fp = fopen(op.file_f, "r");
         if (fp == NULL) {
             printf("Error in open file %s", op.file_f);
+            result = -1;
             goto free_;
         }
         op.servers = malloc(sizeof(char *) * max_size);
@@ -113,17 +139,19 @@ int main(int argc, char **argv) {
         fclose(fp);
     }
 
-    reports = malloc(op.size * sizeof(Report *));
+    reports_s = malloc(op.size * sizeof(Report *));
+    pthread_t* threads = malloc(op.size * sizeof (pthread_t));
+    pthread_mutex_init(&mutex, NULL);
     puts("Start scanning...");
+    size_s = op.size;
     for (int i = 0; i < op.size; i++ )
     {
-        Report *report = scan_server(*(op.servers + i));
-        if(report)
-        {
-            reports[size] = report;
-            size++;
-        }
-        printf("%d of %d\n", i + 1, op.size);
+        pthread_create(&threads[i], NULL, thread_func, *(op.servers + i));
+    }
+
+    for (int i = 0; i < op.size; i++ )
+    {
+        pthread_join(threads[i], NULL);
     }
 
     if(op.file_o)
@@ -131,13 +159,14 @@ int main(int argc, char **argv) {
         fp = freopen(op.file_o, "wb", stdout);
         if(fp == NULL) {
             printf("Error in open file %s", op.file_o);
+            result = -1;
             goto free_;
         }
-        printReports(reports, size);
+        printReports(reports_s, size_s);
         fclose(fp);
     }else
     {
-        printReports(reports, size);
+        printReports(reports_s, size_s);
     }
 
     free_:
@@ -147,10 +176,12 @@ int main(int argc, char **argv) {
             free(op.servers[i]);
         free(op.servers);
     }
-    if(reports) {
+    pthread_mutex_destroy(&mutex);
+    free(threads);
+    if(reports_s) {
         for (int i = 0; i < size; i++)
-                free(reports[i]);
-        free(reports);
+                free(reports_s[i]);
+        free(reports_s);
     }
     return result;
 }
