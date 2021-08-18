@@ -1,4 +1,5 @@
 //#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -116,7 +117,7 @@ int main(int argc, char **argv) {
     }
 
     reports = malloc(op.size * sizeof(Report *));
-    size = threading_visit(op.size, op.servers, reports);
+    size = threading_visit(op.size, op.servers, reports);//serial_visit(op.size, op.servers, reports); //
 
     if(op.file_o)
     {
