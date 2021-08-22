@@ -4,13 +4,21 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-struct cipher{
-    const char *version;
+struct cipher_information
+{
     const char *name;
-    int length;
+    int length_of_key;
 };
 
-typedef struct cipher Cipher;
+struct tls_information{
+    const char *version;
+    struct cipher_information *ciphers;
+    int count_ciphers;
+};
+
+struct cipher_ssl;
+
+typedef struct tls_information TlsInformation;
 
 struct  options{
     char *file_o, *file_f;
@@ -20,11 +28,11 @@ struct  options{
 
 struct report{
     const char *target;
-    Cipher tls_max_version;
-    Cipher tls_min_version;
+    TlsInformation tls_max_version;
+    TlsInformation tls_min_version;
 };
 
-struct const_for_thread{
+struct ctx_of_thread{
     pthread_mutex_t mutex;
     struct report **reports;
     int size;
@@ -33,7 +41,7 @@ struct const_for_thread{
 
 struct thread_arg{
     char *url;
-    struct const_for_thread *thread_data;
+    struct ctx_of_thread *thread_data;
 };
 
 enum ResultScanning{
@@ -45,25 +53,36 @@ enum ResultScanning{
 
 typedef struct thread_scanning_data ScanningData;
 typedef struct report_data ReportData;
-
+typedef struct cipher_information Cipher;
 typedef struct report Report;
 typedef struct options Options;
 typedef struct thread_arg ThreadArg;
-typedef struct const_for_thread ThreadConst;
+typedef struct ctx_of_thread ThreadConst;
+typedef struct cipher_ssl CipherSSL;
+
+static inline void default_cipher(TlsInformation *tls)
+{
+    tls->version = NULL;
+    tls->ciphers = NULL;
+    tls->count_ciphers = 0;
+}
 
 static inline Report * create_report()
 {
     Report *report= malloc (sizeof (Report));
     report->target = NULL;
-    report->tls_min_version.length = 0;
-    report->tls_min_version.name = NULL;
-    report->tls_min_version.version = NULL;
-    report->tls_max_version.length = 0;
-    report->tls_max_version.name = NULL;
-    report->tls_max_version.version = NULL;
+    default_cipher(&report->tls_max_version);
+    default_cipher(&report->tls_min_version);
     return report;
 }
 
+static inline void free_report(Report* report)
+{
+    if(report == NULL)
+        return;
+    free(report->tls_min_version.ciphers);
+    free(report->tls_max_version.ciphers);
+}
 //static inline void free_options(struct options *options)
 //{
 //    if(options->file_o)

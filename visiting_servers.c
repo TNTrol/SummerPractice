@@ -7,7 +7,7 @@
 //#define DEBUG
 
 
-void finish_scanning(ThreadConst *threadConst, Report *report, char *err)
+void finish_scanning(ThreadConst *threadConst, Report *report, char *err, char *url)
 {
     pthread_mutex_lock(&threadConst->mutex);
     int size = threadConst->size;
@@ -17,12 +17,10 @@ void finish_scanning(ThreadConst *threadConst, Report *report, char *err)
     {
         *(threadConst->reports) = report;
         threadConst->reports++;
-#ifdef DEBUG
-        puts(report->target);
-#endif
     }else if(err)
     {
-        fputs( err, stderr);
+        //fputs( err, stderr);
+        fprintf(stderr, "Error in target %s : %s\n", url, err);
     }
     pthread_mutex_unlock(&threadConst->mutex);
 }
@@ -35,7 +33,7 @@ void* thread_func(void *argv)
     printf("URL_THREAD = %s\n", threadArg->url);
 #endif
     Report *report = scan_server_with_error(threadArg->url, &err);
-    finish_scanning(threadArg->thread_data, report, err);
+    finish_scanning(threadArg->thread_data, report, err, threadArg->url);
     free(threadArg);
     return NULL;
 }
@@ -44,30 +42,28 @@ int threading_visit(int size, char **urls, Report **out_reports)
 {
     pthread_t* threads = malloc(size * sizeof (pthread_t));
     ThreadConst threadConst = {.reports = out_reports, .count = 0, .size = size};
+    ThreadArg *threadArg = NULL;
+
     pthread_mutex_init(&threadConst.mutex, NULL);
     puts("Start scanning...");
-#ifdef DEBUG
-    for(int i = 0; i < size; i++)
-        printf("URL%d - %s\n", i, urls[i]);
-#endif
     for (int i = 0; i < size; i++ )
     {
-        ThreadArg *threadArg = malloc(sizeof(ThreadArg)); //{.url = *(urls + i), .thread_data = &threadConst};
+        threadArg = malloc(sizeof(ThreadArg));
         threadArg->url = *(urls + i);
         threadArg->thread_data = &threadConst;
-#ifdef DEBUG
-        printf("URL_THREAD = %s\n", threadArg->url);
-#endif
         pthread_create(&threads[i], NULL, thread_func, threadArg);
+        threadArg = NULL;
     }
-
     for (int i = 0; i < size; i++ )
     {
         pthread_join(threads[i], NULL);
     }
     pthread_mutex_destroy(&threadConst.mutex);
     free(threads);
-    return threadConst.count;
+#ifdef DEBUG
+    printf("SIZE = %d\n", threadConst.reports - out_reports);
+#endif
+    return (int)(threadConst.reports - out_reports);
 }
 
 int serial_visit(int size, char **urls, Report **out_reports)
