@@ -42,7 +42,7 @@ Name: DHE-RSA-AES256-GCM-SHA384	 Length: 256
 Name: ECDHE-RSA-AES256-GCM-SHA384	 Length: 256
 Name: ECDHE-ECDSA-AES256-GCM-SHA384	 Length: 256
 ___________Report__________
-Target: https://www.youtube.com
+Target: https://www.vk.com
 
 Minimal version: TLSv1 
 Supported ciphers:
@@ -61,7 +61,7 @@ Name: TLS_AES_128_GCM_SHA256	 Length: 128
 Name: TLS_CHACHA20_POLY1305_SHA256	 Length: 256
 Name: TLS_AES_256_GCM_SHA384	 Length: 256
 ___________Report__________
-Target: https://www.vk.com
+Target: https://www.youtube.com
 
 Minimal version: TLSv1 
 Supported ciphers:
@@ -118,6 +118,63 @@ Name: TLS_AES_128_GCM_SHA256	 Length: 128
 Name: TLS_CHACHA20_POLY1305_SHA256	 Length: 256
 Name: TLS_AES_256_GCM_SHA384	 Length: 256
 ___________Report__________
+Target: telegram.org
+
+Minimal version: TLSv1.2 
+Supported ciphers:
+Name: AES128-SHA	 Length: 128
+Name: AES256-SHA	 Length: 256
+Name: AES128-SHA256	 Length: 128
+Name: AES256-SHA256	 Length: 256
+Name: AES128-GCM-SHA256	 Length: 128
+Name: AES256-GCM-SHA384	 Length: 256
+Name: DHE-RSA-AES128-SHA	 Length: 128
+Name: ECDHE-RSA-AES128-SHA	 Length: 128
+Name: ECDHE-ECDSA-AES128-SHA	 Length: 128
+Name: DHE-RSA-AES256-SHA	 Length: 256
+Name: ECDHE-RSA-AES256-SHA	 Length: 256
+Name: ECDHE-ECDSA-AES256-SHA	 Length: 256
+Name: DHE-RSA-AES128-SHA256	 Length: 128
+Name: ECDHE-RSA-AES128-SHA256	 Length: 128
+Name: ECDHE-ECDSA-AES128-SHA256	 Length: 128
+Name: DHE-RSA-AES256-SHA256	 Length: 256
+Name: ECDHE-RSA-AES256-SHA384	 Length: 256
+Name: ECDHE-ECDSA-AES256-SHA384	 Length: 256
+Name: DHE-RSA-AES128-GCM-SHA256	 Length: 128
+Name: ECDHE-RSA-AES128-GCM-SHA256	 Length: 128
+Name: ECDHE-ECDSA-AES128-GCM-SHA256	 Length: 128
+Name: DHE-RSA-CHACHA20-POLY1305	 Length: 256
+Name: ECDHE-RSA-CHACHA20-POLY1305	 Length: 256
+Name: ECDHE-ECDSA-CHACHA20-POLY1305	 Length: 256
+Name: DHE-RSA-AES256-GCM-SHA384	 Length: 256
+Name: ECDHE-RSA-AES256-GCM-SHA384	 Length: 256
+Name: ECDHE-ECDSA-AES256-GCM-SHA384	 Length: 256
+
+Maximal version: TLSv1.3 
+Supported ciphers:
+Name: TLS_AES_128_GCM_SHA256	 Length: 128
+Name: TLS_CHACHA20_POLY1305_SHA256	 Length: 256
+Name: TLS_AES_256_GCM_SHA384	 Length: 256
+___________Report__________
+Target: https://en.dsr-corporation.com
+
+Minimal version: TLSv1 
+Supported ciphers:
+Name: AES128-SHA	 Length: 128
+Name: AES256-SHA	 Length: 256
+Name: DHE-RSA-AES128-SHA	 Length: 128
+Name: ECDHE-RSA-AES128-SHA	 Length: 128
+Name: ECDHE-ECDSA-AES128-SHA	 Length: 128
+Name: DHE-RSA-AES256-SHA	 Length: 256
+Name: ECDHE-RSA-AES256-SHA	 Length: 256
+Name: ECDHE-ECDSA-AES256-SHA	 Length: 256
+
+Maximal version: TLSv1.3 
+Supported ciphers:
+Name: TLS_AES_128_GCM_SHA256	 Length: 128
+Name: TLS_CHACHA20_POLY1305_SHA256	 Length: 256
+Name: TLS_AES_256_GCM_SHA384	 Length: 256
+___________Report__________
 Target: https://www.dsr.com
 
 Minimal version: TLSv1 
@@ -160,22 +217,3 @@ Name: ECDHE-ECDSA-CHACHA20-POLY1305	 Length: 256
 Name: DHE-RSA-AES256-GCM-SHA384	 Length: 256
 Name: ECDHE-RSA-AES256-GCM-SHA384	 Length: 256
 Name: ECDHE-ECDSA-AES256-GCM-SHA384	 Length: 256
-___________Report__________
-Target: https://en.dsr-corporation.com
-
-Minimal version: TLSv1 
-Supported ciphers:
-Name: AES128-SHA	 Length: 128
-Name: AES256-SHA	 Length: 256
-Name: DHE-RSA-AES128-SHA	 Length: 128
-Name: ECDHE-RSA-AES128-SHA	 Length: 128
-Name: ECDHE-ECDSA-AES128-SHA	 Length: 128
-Name: DHE-RSA-AES256-SHA	 Length: 256
-Name: ECDHE-RSA-AES256-SHA	 Length: 256
-Name: ECDHE-ECDSA-AES256-SHA	 Length: 256
-
-Maximal version: TLSv1.3 
-Supported ciphers:
-Name: TLS_AES_128_GCM_SHA256	 Length: 128
-Name: TLS_CHACHA20_POLY1305_SHA256	 Length: 256
-Name: TLS_AES_256_GCM_SHA384	 Length: 256

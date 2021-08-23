@@ -8,7 +8,7 @@
 #include "visiting_servers.h"
 #define SIZE 10
 
-void print_name_cipher(TlsInformation *cipher, char* version)
+void print_name_cipher23(TlsInformation *cipher, char* version)
 {
     printf("\n%s version: %s \nSupported ciphers:\n", version, cipher->version);
     for(int i = 0; i < cipher->count_ciphers; ++i)
@@ -21,8 +21,8 @@ void printReport(Report *report)
 {
     puts("___________Report__________");
     printf("Target: %s\n",report->target);
-    print_name_cipher(&report->tls_min_version, "Minimal");
-    print_name_cipher(&report->tls_max_version, "Maximal");
+    print_name_cipher23(&report->tls_min_version, "Minimal");
+    print_name_cipher23(&report->tls_max_version, "Maximal");
 }
 
 void printReports(Report **reports, int size)

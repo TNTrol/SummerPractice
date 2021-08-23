@@ -1,17 +1,15 @@
 #include "scanner.h"
-//#define DEBUG1
+#define DEBUG
 
 struct cipher_ssl{
     struct stack_st_SSL_CIPHER *ciphers_stack;
     const char *version;
-    int length_of_key;
 };
 
 CipherSSL *create_cipher_SSL()
 {
     CipherSSL *cipher = malloc(sizeof (CipherSSL));
     cipher->version = NULL;
-    cipher->length_of_key = 0;
     cipher->ciphers_stack = NULL;
     return cipher;
 }
@@ -72,7 +70,7 @@ int scan_server_cipher(char *dest_url, int version, CipherSSL *cipher, char **er
     const SSL_METHOD *method = NULL;
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
-    int server = 0, key = -1;
+    int server = 0;
     enum ResultScanning result = SUCCESS;
     method = TLS_client_method();
     if ( (ctx = SSL_CTX_new(method)) == NULL)
@@ -94,7 +92,7 @@ int scan_server_cipher(char *dest_url, int version, CipherSSL *cipher, char **er
     SSL_set_fd(ssl, server);
     if (SSL_connect(ssl) != 1)
     {
-        *err_msg = "Could not build a SSL session to";
+        *err_msg = "Could not build a SSL session";
         result = DONT_SUPPORT_VERSION_SSL;
         goto mem_free;
     }
@@ -108,7 +106,6 @@ int scan_server_cipher(char *dest_url, int version, CipherSSL *cipher, char **er
     }
 
     cipher->version = SSL_get_version(ssl);
-    cipher->length_of_key = key;
     sk_SSL_CIPHER_free(cipher->ciphers_stack);
     cipher->ciphers_stack = SSL_get1_supported_ciphers(ssl);
 #ifdef DEBUG1
@@ -119,7 +116,7 @@ int scan_server_cipher(char *dest_url, int version, CipherSSL *cipher, char **er
     mem_free:
     if(ssl)
         SSL_free(ssl);
-    if(server > 0)
+    if(server != 0)
         close(server);
     if(cert)
         X509_free(cert);
@@ -133,7 +130,6 @@ int scan_server_report(char *dest_url, Report *report, char **err_msg)
     int res = 1, type = 0;
     CipherSSL *min_cipher = NULL, *curr_cipher = NULL;
     OpenSSL_add_all_algorithms();
-    ERR_load_BIO_strings();
     ERR_load_crypto_strings();
     SSL_load_error_strings();
 
@@ -146,7 +142,11 @@ int scan_server_report(char *dest_url, Report *report, char **err_msg)
     curr_cipher = create_cipher_SSL();
     for(int i = 0; i < COUNT_VERSION; i++)
     {
+        *err_msg = NULL;
         res = scan_server_cipher(dest_url, Versions[i], curr_cipher, err_msg);
+#ifdef DEBUG
+        printf("RES = %d of %s\n", res, dest_url);
+#endif
         switch (res)
         {
             case SUCCESS:
@@ -201,7 +201,7 @@ Report *scan_server(char *url_str)
     Report *report  = scan_server_with_error(url_str, &err);
     if(!report)
     {
-        printf( "Target: %s.\n Error: %s", url_str, err);
+        printf( "Target: %s.\nError: %s\n", url_str, err);
         free(report);
         return NULL;
     }

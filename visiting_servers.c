@@ -19,7 +19,6 @@ void finish_scanning(ThreadConst *threadConst, Report *report, char *err, char *
         threadConst->reports++;
     }else if(err)
     {
-        //fputs( err, stderr);
         fprintf(stderr, "Error in target %s : %s\n", url, err);
     }
     pthread_mutex_unlock(&threadConst->mutex);
@@ -29,7 +28,7 @@ void* thread_func(void *argv)
 {
     ThreadArg *threadArg= (ThreadArg *) argv;
     char *err;
-#ifdef DEBUG1
+#ifdef DEBUG
     printf("URL_THREAD = %s\n", threadArg->url);
 #endif
     Report *report = scan_server_with_error(threadArg->url, &err);
@@ -60,9 +59,6 @@ int threading_visit(int size, char **urls, Report **out_reports)
     }
     pthread_mutex_destroy(&threadConst.mutex);
     free(threads);
-#ifdef DEBUG
-    printf("SIZE = %d\n", threadConst.reports - out_reports);
-#endif
     return (int)(threadConst.reports - out_reports);
 }
 
