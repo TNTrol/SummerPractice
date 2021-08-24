@@ -23,6 +23,7 @@ typedef struct io_ctx IO_ctx;
 typedef struct message Message;
 typedef struct thread_ctx Thread_ctx;
 
+// T_T
 void push(IO_ctx *ctx, void *);
 void push_data(Thread_ctx *ctx, void* data);
 Thread_ctx * init( int count_thread, void* (*thread_function) (void*, IO_ctx *));

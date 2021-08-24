@@ -5,6 +5,8 @@
 #include "visiting_servers.h"
 #include "scanner.h"
 #include "thread_pool.h"
+
+#define COUNT_THREAD 3
 //#define DEBUG
 
 
@@ -18,7 +20,8 @@ void finish_scanning(ThreadConst *threadConst, Report *report, char *err, char *
     {
         *(threadConst->reports) = report;
         threadConst->reports++;
-    }else if(err)
+    }
+    else if(err)
     {
         fprintf(stderr, "Error in target %s : %s\n", url, err);
     }
@@ -46,7 +49,7 @@ int threading_visit(int size, char **urls, Report **out_reports)
 
     pthread_mutex_init(&threadConst.mutex, NULL);
     puts("Start scanning...");
-    for (int i = 0; i < size; i++ )
+    for(int i = 0; i < size; ++i)
     {
         threadArg = malloc(sizeof(ThreadArg));
         threadArg->url = *(urls + i);
@@ -54,7 +57,7 @@ int threading_visit(int size, char **urls, Report **out_reports)
         pthread_create(&threads[i], NULL, thread_func, threadArg);
         threadArg = NULL;
     }
-    for (int i = 0; i < size; i++ )
+    for(int i = 0; i < size; ++i)
     {
         pthread_join(threads[i], NULL);
     }
@@ -67,7 +70,7 @@ int serial_visit(int size, char **urls, Report **out_reports)
 {
     int read = 0;
     puts("Start scanning...");
-    for (int i = 0; i < size; i++ )
+    for(int i = 0; i < size; ++i)
     {
         Report *report = scan_server(*(urls + i));
         if(report)
@@ -85,7 +88,6 @@ void* output(void *arg)
     OutThreadPoolArg *out_data = (OutThreadPoolArg *) arg;
     printf("%d of %d\n", out_data->out_data->count + 1, out_data->out_data->size);
     out_data->out_data->count++;
-    //puts(argvisit->url);
     if(out_data->report)
     {
         *out_data->out_data->reports = out_data->report;
@@ -95,8 +97,8 @@ void* output(void *arg)
     {
         fprintf(stderr, "Error in target %s : %s\n", out_data->url, out_data->error);
     }
-//    if(out_data->out_data->count >= out_data->out_data->size)
-//        stop(out_data->ctx);
+    if(out_data->out_data->count >= out_data->out_data->size )
+        stop(out_data->ctx);
     free(out_data);
     return NULL;
 }
@@ -121,9 +123,9 @@ int threading_visit_with_thread_pool(int size, char **urls, Report **out_reports
 {
     ThreadConst threadConst = {.reports = out_reports, .count = 0, .size = size};
     InThreadPoolArg *in_arg = NULL;
-    Thread_ctx *ctx = init(3, func_thread);
+    Thread_ctx *ctx = init(COUNT_THREAD, func_thread);
     set_output(ctx, output);
-    puts("Start scanning");
+    puts("Start scanning...");
 
     for(int i = 0; i < size; ++i)
     {
@@ -135,14 +137,13 @@ int threading_visit_with_thread_pool(int size, char **urls, Report **out_reports
         in_arg = NULL;
     }
     run(ctx);
-//    while (is_alive(ctx))
+    while (is_alive(ctx))
+    {
+    }
+//    while (threadConst.count <= threadConst.size - 1) //tut minus kotic
 //    {
 //    }
-    while (threadConst.count <= threadConst.size - 1)
-    {
-
-    }
-    stop(ctx);
+//    stop(ctx);
     destroy(ctx);
-    return threadConst.reports - out_reports;
+    return (int)(threadConst.reports - out_reports);
 }

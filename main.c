@@ -59,13 +59,13 @@ int main(int argc, char **argv)
         return 1;
     }
     Options op = {.file_f = NULL, .size = 0, .file_o = NULL, .servers = NULL};
-    int result = 0;
+    int result = 0, err_input = 0;
     int size = 0;
     int max_size = SIZE;
     Report **reports = NULL;
     FILE *fp = NULL;
 
-    for(int i = 1; i < argc; i++)
+    for(int i = 1; i < argc; ++i)
     {
         if(strcmp(argv[i], "-f") == 0)
         {
@@ -92,6 +92,7 @@ int main(int argc, char **argv)
         if(op.size > 0 && op.file_f)
         {
             puts("Data entry is not possible from file and console at the same time");
+            err_input = -1;
             goto free_;
         }
     }
@@ -112,9 +113,13 @@ int main(int argc, char **argv)
         while ((read = getline(&line, &len, fp)) != -1)
         {
             if (read <= 2)
+            {
                 continue;
+            }
             if (line[read - 1] == '\n')
+            {
                 line[read - 1] = 0;
+            }
             if (max_size <= op.size)
             {
                 max_size *= 2;
@@ -128,9 +133,9 @@ int main(int argc, char **argv)
     }
 
     reports = malloc(op.size * sizeof(Report *));
-    //size = threading_visit(op.size, op.servers, reports);//
-    //size = serial_visit(op.size, op.servers, reports); //
-    size = threading_visit_with_thread_pool(op.size, op.servers, reports);
+    //size = threading_visit(op.size, op.servers, reports);// во все потоки
+    //size = serial_visit(op.size, op.servers, reports); // последовательно
+    size = threading_visit_with_thread_pool(op.size, op.servers, reports);// T_T во весь пул потоков
 
 
     if(op.file_o)
@@ -152,16 +157,20 @@ int main(int argc, char **argv)
 
 
     free_:
-    if(op.file_f)
+    if(op.file_f && err_input > 0)
     {
         for(int i = 0; i < op.size; i++)
+        {
             free(op.servers[i]);
+        }
         free(op.servers);
     }
     if(reports)
     {
         for (int i = 0; i < size; i++)
-                free_report(reports[i]);
+        {
+            free_report(reports[i]);
+        }
         free(reports);
     }
     return result;

@@ -18,9 +18,9 @@ int create_socket(char url_str[], char **err)
 {
     int sock_fd;
     char hostname[256] = "";
-    char    port_num[6] = PORT_CHARS;
-    char      *tmp_ptr = NULL, *addr_ptr = NULL;
-    int           port = PORT;
+    char port_num[6] = PORT_CHARS;
+    char *tmp_ptr = NULL, *addr_ptr = NULL;
+    int port = PORT;
     struct hostent *host;
     struct sockaddr_in dest_addr;
     if(url_str[strlen(url_str)] == '/')

@@ -159,7 +159,7 @@ void run(Thread_ctx *ctx)
     }
 }
 
-void stop(Thread_ctx *ctx)
+void stop_thread(Thread_ctx *ctx)
 {
     while (size_stack(ctx->input_ctx) > 0)
     {
@@ -193,6 +193,7 @@ void free_io_ctx(IO_ctx *ctx)
 
 void destroy(Thread_ctx *ctx)
 {
+    stop_thread(ctx);
     if(ctx->status == RUN)
     {
         return;
@@ -230,4 +231,9 @@ int set_input(Thread_ctx *ctx, void* (*i_function) (IO_ctx *))
 int is_alive(Thread_ctx *ctx)
 {
     return ctx->status == RUN;
+}
+
+void stop(Thread_ctx *ctx)
+{
+    ctx->status = STOP;
 }
