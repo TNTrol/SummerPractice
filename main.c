@@ -8,7 +8,7 @@
 #include "visiting_servers.h"
 #define SIZE 10
 
-void print_name_cipher23(TlsInformation *cipher, char* version)
+void print_name_cipher(TlsInformation *cipher, char* version)
 {
     printf("\n%s version: %s \nSupported ciphers:\n", version, cipher->version);
     for(int i = 0; i < cipher->count_ciphers; ++i)
@@ -21,8 +21,8 @@ void printReport(Report *report)
 {
     puts("___________Report__________");
     printf("Target: %s\n",report->target);
-    print_name_cipher23(&report->tls_min_version, "Minimal");
-    print_name_cipher23(&report->tls_max_version, "Maximal");
+    print_name_cipher(&report->tls_min_version, "Minimal");
+    print_name_cipher(&report->tls_max_version, "Maximal");
 }
 
 void printReports(Report **reports, int size)
@@ -128,8 +128,10 @@ int main(int argc, char **argv)
     }
 
     reports = malloc(op.size * sizeof(Report *));
-    size = threading_visit(op.size, op.servers, reports);//
+    //size = threading_visit(op.size, op.servers, reports);//
     //size = serial_visit(op.size, op.servers, reports); //
+    size = threading_visit_with_thread_pool(op.size, op.servers, reports);
+
 
     if(op.file_o)
     {
@@ -147,6 +149,7 @@ int main(int argc, char **argv)
     {
         printReports(reports, size);
     }
+
 
     free_:
     if(op.file_f)

@@ -4,6 +4,7 @@
 
 #include "visiting_servers.h"
 #include "scanner.h"
+#include "thread_pool.h"
 //#define DEBUG
 
 
@@ -77,4 +78,71 @@ int serial_visit(int size, char **urls, Report **out_reports)
         printf("%d of %d\n", i + 1, size);
     }
     return read;
+}
+
+void* output(void *arg)
+{
+    OutThreadPoolArg *out_data = (OutThreadPoolArg *) arg;
+    printf("%d of %d\n", out_data->out_data->count + 1, out_data->out_data->size);
+    out_data->out_data->count++;
+    //puts(argvisit->url);
+    if(out_data->report)
+    {
+        *out_data->out_data->reports = out_data->report;
+        out_data->out_data->reports++;
+    }
+    else
+    {
+        fprintf(stderr, "Error in target %s : %s\n", out_data->url, out_data->error);
+    }
+//    if(out_data->out_data->count >= out_data->out_data->size)
+//        stop(out_data->ctx);
+    free(out_data);
+    return NULL;
+}
+
+void* func_thread(void* data, IO_ctx *ctx)
+{
+    InThreadPoolArg *in_data = (InThreadPoolArg*) data;
+    char *err;
+    Report *report = scan_server_with_error(in_data->url, &err);
+    OutThreadPoolArg *out_data = malloc(sizeof(OutThreadPoolArg));
+    out_data->out_data = in_data->out_data;
+    out_data->report = report;
+    out_data->url = in_data->url;
+    out_data->ctx = in_data->ctx;
+    out_data->error = err;
+    push(ctx, out_data);
+    free(in_data);
+    return NULL;
+}
+
+int threading_visit_with_thread_pool(int size, char **urls, Report **out_reports)
+{
+    ThreadConst threadConst = {.reports = out_reports, .count = 0, .size = size};
+    InThreadPoolArg *in_arg = NULL;
+    Thread_ctx *ctx = init(3, func_thread);
+    set_output(ctx, output);
+    puts("Start scanning");
+
+    for(int i = 0; i < size; ++i)
+    {
+        in_arg = malloc(sizeof(InThreadPoolArg));
+        in_arg->url = urls[i];
+        in_arg->ctx = ctx;
+        in_arg->out_data = &threadConst;
+        push_data(ctx, in_arg);
+        in_arg = NULL;
+    }
+    run(ctx);
+//    while (is_alive(ctx))
+//    {
+//    }
+    while (threadConst.count <= threadConst.size - 1)
+    {
+
+    }
+    stop(ctx);
+    destroy(ctx);
+    return threadConst.reports - out_reports;
 }

@@ -1,5 +1,5 @@
 #include "scanner.h"
-#define DEBUG
+//#define DEBUG
 
 struct cipher_ssl{
     struct stack_st_SSL_CIPHER *ciphers_stack;

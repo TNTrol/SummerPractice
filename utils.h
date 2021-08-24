@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-
+#include "thread_pool.h"
+//структуры для хранения всех данных сканирования
 struct cipher_information
 {
     const char *name;
@@ -17,7 +18,6 @@ struct tls_information{
 };
 
 struct cipher_ssl;
-
 typedef struct tls_information TlsInformation;
 
 struct  options{
@@ -32,6 +32,7 @@ struct report{
     TlsInformation tls_min_version;
 };
 
+//для методов сканирования с помощью потоков
 struct ctx_of_thread{
     pthread_mutex_t mutex;
     struct report **reports;
@@ -44,6 +45,22 @@ struct thread_arg{
     struct ctx_of_thread *thread_data;
 };
 
+//это для методов сканирования с помощью пула потоков
+struct thread_pool_arg{
+    Thread_ctx *ctx;
+    char *url;
+    struct ctx_of_thread *out_data;
+};
+
+struct thread_pool_out{
+    Thread_ctx *ctx;
+    char *url;
+    char *error;
+    struct report *report;
+    struct ctx_of_thread *out_data;
+};
+
+//резульат сканирования, почему не #difine просто не знал как правильно
 enum ResultScanning{
     NOT_FOUND_SERVER = 0,
     DONT_SUPPORT_VERSION_SSL = -1,
@@ -59,6 +76,8 @@ typedef struct options Options;
 typedef struct thread_arg ThreadArg;
 typedef struct ctx_of_thread ThreadConst;
 typedef struct cipher_ssl CipherSSL;
+typedef struct thread_pool_arg  InThreadPoolArg;
+typedef struct thread_pool_out  OutThreadPoolArg;
 
 static inline void default_cipher(TlsInformation *tls)
 {

@@ -7,6 +7,7 @@
 
 #include "utils.h"
 
+int threading_visit_with_thread_pool(int size, char **urls, Report **out_reports);
 int threading_visit(int size, char **urls, Report **out_reports);
 int serial_visit(int size, char **urls, Report **out_reports);
 
