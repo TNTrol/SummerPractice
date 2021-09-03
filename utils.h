@@ -46,19 +46,12 @@ struct thread_arg{
 };
 
 //это для методов сканирования с помощью пула потоков
-struct thread_pool_arg{
-    Thread_ctx *ctx;
-    char *url;
-    struct ctx_of_thread *out_data;
+struct thread_all_data
+{
+    struct ctx_of_thread *ctx;
+    char **url;
 };
 
-struct thread_pool_out{
-    Thread_ctx *ctx;
-    char *url;
-    char *error;
-    struct report *report;
-    struct ctx_of_thread *out_data;
-};
 
 //резульат сканирования, почему не #difine просто не знал как правильно
 enum ResultScanning{
@@ -68,16 +61,13 @@ enum ResultScanning{
     ERROR = -2
 };
 
-typedef struct thread_scanning_data ScanningData;
-typedef struct report_data ReportData;
 typedef struct cipher_information Cipher;
 typedef struct report Report;
 typedef struct options Options;
 typedef struct thread_arg ThreadArg;
 typedef struct ctx_of_thread ThreadConst;
 typedef struct cipher_ssl CipherSSL;
-typedef struct thread_pool_arg  InThreadPoolArg;
-typedef struct thread_pool_out  OutThreadPoolArg;
+typedef struct thread_all_data ThreadAllData;
 
 static inline void default_cipher(TlsInformation *tls)
 {
@@ -102,14 +92,6 @@ static inline void free_report(Report* report)
     free(report->tls_min_version.ciphers);
     free(report->tls_max_version.ciphers);
 }
-//static inline void free_options(struct options *options)
-//{
-//    if(options->file_o)
-//        free(options->file_o);
-//    if(options->file_f)
-//        free(options->file_f);
-//    if(options->servers)
-//        free(options->servers);
-//}
+
 
 #endif
