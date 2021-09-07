@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "scanner.h"
-#include "utils.h"
-#include "visiting_servers.h"
+#include "../include/scanner.h"
+#include "../include/utils.h"
+#include "../include/visiting_servers.h"
 #define SIZE 10
 
 void print_name_cipher(TlsInformation *cipher, char* version)
@@ -58,12 +58,13 @@ int main(int argc, char **argv)
         puts("Invalid number of parameters");
         return 1;
     }
-    Options op = {.file_f = NULL, .size = 0, .file_o = NULL, .servers = NULL};
-    int result = 0, err_input = 0;
-    int size = 0;
-    int max_size = SIZE;
-    Report **reports = NULL;
-    FILE *fp = NULL;
+    Options op          = {.file_f = NULL, .size = 0, .file_o = NULL, .servers = NULL};
+    int result          = 0;
+    int err_input       = 0;
+    int size            = 0;
+    int max_size        = SIZE;
+    Report **reports    = NULL;
+    FILE *fp            = NULL;
 
     for(int i = 1; i < argc; ++i)
     {
@@ -133,10 +134,9 @@ int main(int argc, char **argv)
     }
 
     reports = malloc(op.size * sizeof(Report *));
-    //size = threading_visit(op.size, op.servers, reports);// во все потоки
-    //size = serial_visit(op.size, op.servers, reports); // последовательно
-    size = threading_visit_with_thread_pool(op.size, op.servers, reports);// T_T во весь пул потоков
-
+    //size = threading_visit(op.size, op.servers, reports);                 // во все потоки
+    //size = serial_visit(op.size, op.servers, reports);                    // последовательно
+    size = threading_visit_with_thread_pool(op.size, op.servers, reports);  // T_T во весь пул потоков
 
     if(op.file_o)
     {

@@ -2,9 +2,9 @@
 // Created by tntrol on 17.08.2021.
 //
 
-#include "visiting_servers.h"
-#include "scanner.h"
-#include "thread_pool.h"
+#include "../include/visiting_servers.h"
+#include "../include/scanner.h"
+#include "../include/thread_pool.h"
 
 #define COUNT_THREAD 3
 //#define DEBUG
@@ -43,9 +43,9 @@ void* thread_func(void *argv)
 
 int threading_visit(int size, char **urls, Report **out_reports)
 {
-    pthread_t* threads = malloc(size * sizeof (pthread_t));
+    pthread_t* threads      = malloc(size * sizeof (pthread_t));
     ThreadConst threadConst = {.reports = out_reports, .count = 0, .size = size};
-    ThreadArg *threadArg = NULL;
+    ThreadArg *threadArg    = NULL;
 
     pthread_mutex_init(&threadConst.mutex, NULL);
     puts("Start scanning...");
@@ -134,9 +134,9 @@ void* loop_func(Thread_ctx *ctx, void *arg)
 
 int threading_visit_with_thread_pool(int size, char **urls, Report **out_reports)
 {
-    ThreadConst threadConst = {.reports = out_reports, .count = 0, .size = size};
+    ThreadConst threadConst     = {.reports = out_reports, .count = 0, .size = size};
     ThreadAllData threadAllData = {.url = urls, .ctx = &threadConst};
-    Thread_ctx *ctx = init(COUNT_THREAD, loop_func, &threadAllData);
+    Thread_ctx *ctx             = init(COUNT_THREAD, loop_func, &threadAllData);
     puts("Start scanning...");
     run(ctx);
     while (is_alive(ctx))

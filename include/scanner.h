@@ -22,9 +22,9 @@ extern "C" {                 // Make sure we have C-declarations in C++ programs
 #include <openssl/x509_vfy.h>
 #include <unistd.h>
 #include "utils.h"
-#define COUNT_VERSION 5
-#define PORT 443
-#define PORT_CHARS "443"
+#define COUNT_VERSION   5
+#define PORT            443
+#define PORT_CHARS      "443"
 
 static const int Versions[COUNT_VERSION] = { SSL3_VERSION, TLS1_VERSION, TLS1_1_VERSION, TLS1_2_VERSION, TLS1_3_VERSION };
 int create_socket(char url_str[], char **out);

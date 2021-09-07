@@ -2,7 +2,7 @@
 // Created by tntrol on 23.08.2021.
 //
 
-#include "thread_pool.h"
+#include "../include/thread_pool.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>

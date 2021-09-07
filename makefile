@@ -1,7 +1,8 @@
 CC=gcc
 CFLAGS=-c -Wall
 LDFLAGS=
-SOURCES=main.c scanner.c thread_pool.c visiting_servers.c
+PWD=src
+SOURCES=$(PWD)/main.c $(PWD)/scanner.c $(PWD)/thread_pool.c $(PWD)/visiting_servers.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=util_scanner
 LIBS=-lpthread -lcrypto -lssl
@@ -15,4 +16,4 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o
+	rm -rf $(PWD)/*.o $(EXECUTABLE)
