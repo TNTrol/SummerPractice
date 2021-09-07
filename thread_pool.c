@@ -21,10 +21,10 @@ struct queue{
 
 struct thread_ctx{
     Queue *queue;
-    int count_thread;
     pthread_t *threads;
     void *arg;
     void* (*thread_function) (Thread_ctx *, void*);
+    int count_thread;
     enum Status status;
 };
 

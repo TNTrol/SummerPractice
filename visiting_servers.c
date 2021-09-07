@@ -83,8 +83,6 @@ int serial_visit(int size, char **urls, Report **out_reports)
     return read;
 }
 
-
-
 void* func_thread1(Thread_ctx *ctx, void* arg)
 {
     ThreadArg *threadArg = (ThreadArg*) arg;
@@ -118,7 +116,6 @@ void* loop_func(Thread_ctx *ctx, void *arg)
     int size;
     if (data->url)
     {
-        puts("ok2_thread_loop");
         size = data->ctx->size;
         while (size)
         {

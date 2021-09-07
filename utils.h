@@ -21,7 +21,8 @@ struct cipher_ssl;
 typedef struct tls_information TlsInformation;
 
 struct  options{
-    char *file_o, *file_f;
+    char *file_o;
+    char *file_f;
     char **servers;
     int size;
 };
