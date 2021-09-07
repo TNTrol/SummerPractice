@@ -1,4 +1,4 @@
-#include "scanner.h"
+#include "../include/scanner.h"
 //#define DEBUG
 
 struct cipher_ssl{
@@ -17,11 +17,11 @@ CipherSSL *create_cipher_SSL()
 int create_socket(char url_str[], char **err)
 {
     int sock_fd;
-    char hostname[256] = "";
-    char port_num[6] = PORT_CHARS;
-    char *tmp_ptr = NULL, *addr_ptr = NULL;
-    int port = PORT;
-    struct hostent *host;
+    char hostname[256]      = "";
+    char port_num[6]        = PORT_CHARS;
+    char *tmp_ptr           = NULL, *addr_ptr = NULL;
+    int port                = PORT;
+    struct hostent *host    = NULL;
     struct sockaddr_in dest_addr;
     if(url_str[strlen(url_str)] == '/')
     {
@@ -64,14 +64,15 @@ int create_socket(char url_str[], char **err)
 }
 
 
-int scan_server_cipher(char *dest_url, int version, CipherSSL *cipher, char **err_msg)
+enum ResultScanning scan_server_cipher(char *dest_url, int version, CipherSSL *cipher, char **err_msg)
 {
-    X509 *cert = NULL;
-    const SSL_METHOD *method = NULL;
-    SSL_CTX *ctx = NULL;
-    SSL *ssl = NULL;
-    int server = 0;
-    enum ResultScanning result = SUCCESS;
+    X509 *cert                  = NULL;
+    const SSL_METHOD *method    = NULL;
+    SSL_CTX *ctx                = NULL;
+    SSL *ssl                    = NULL;
+    int server                  = 0;
+    enum ResultScanning result  = SUCCESS;
+
     method = TLS_client_method();
     if ( (ctx = SSL_CTX_new(method)) == NULL)
     {
@@ -111,8 +112,6 @@ int scan_server_cipher(char *dest_url, int version, CipherSSL *cipher, char **er
 #ifdef DEBUG1
         printf("L = %d\n", key);
 #endif
-
-
     mem_free:
     if(ssl)
         SSL_free(ssl);
@@ -127,8 +126,11 @@ int scan_server_cipher(char *dest_url, int version, CipherSSL *cipher, char **er
 
 int scan_server_report(char *dest_url, Report *report, char **err_msg)
 {
-    int res = 1, type = 0;
-    CipherSSL *min_cipher = NULL, *curr_cipher = NULL;
+    enum ResultScanning res = 1;
+    int type                = 0;
+    CipherSSL *min_cipher   = NULL;
+    CipherSSL *curr_cipher  = NULL;
+
     OpenSSL_add_all_algorithms();
     ERR_load_crypto_strings();
     SSL_load_error_strings();
@@ -197,8 +199,9 @@ int scan_server_report(char *dest_url, Report *report, char **err_msg)
 
 Report *scan_server(char *url_str)
 {
-    char *err = NULL;
+    char *err       = NULL;
     Report *report  = scan_server_with_error(url_str, &err);
+
     if(!report)
     {
         printf( "Target: %s.\nError: %s\n", url_str, err);
@@ -210,7 +213,7 @@ Report *scan_server(char *url_str)
 
 Report * scan_server_with_error(char url_str[], char **err)
 {
-    Report *report  = create_report();
+    Report *report = create_report();
     if(scan_server_report(url_str, report, err) < 0)
     {
         free(report);

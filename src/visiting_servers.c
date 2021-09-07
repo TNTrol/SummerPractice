@@ -2,9 +2,9 @@
 // Created by tntrol on 17.08.2021.
 //
 
-#include "visiting_servers.h"
-#include "scanner.h"
-#include "thread_pool.h"
+#include "../include/visiting_servers.h"
+#include "../include/scanner.h"
+#include "../include/thread_pool.h"
 
 #define COUNT_THREAD 3
 //#define DEBUG
@@ -43,9 +43,9 @@ void* thread_func(void *argv)
 
 int threading_visit(int size, char **urls, Report **out_reports)
 {
-    pthread_t* threads = malloc(size * sizeof (pthread_t));
+    pthread_t* threads      = malloc(size * sizeof (pthread_t));
     ThreadConst threadConst = {.reports = out_reports, .count = 0, .size = size};
-    ThreadArg *threadArg = NULL;
+    ThreadArg *threadArg    = NULL;
 
     pthread_mutex_init(&threadConst.mutex, NULL);
     puts("Start scanning...");
@@ -83,67 +83,65 @@ int serial_visit(int size, char **urls, Report **out_reports)
     return read;
 }
 
-void* output(void *arg)
+void* func_thread1(Thread_ctx *ctx, void* arg)
 {
-    OutThreadPoolArg *out_data = (OutThreadPoolArg *) arg;
-    printf("%d of %d\n", out_data->out_data->count + 1, out_data->out_data->size);
-    out_data->out_data->count++;
-    if(out_data->report)
+    ThreadArg *threadArg = (ThreadArg*) arg;
+    char *err = NULL;
+    Report *report = scan_server_with_error(threadArg->url, &err);
+    pthread_mutex_lock(&threadArg->thread_data->mutex);
+    printf("%d of %d\n", threadArg->thread_data->count + 1, threadArg->thread_data->size);
+    threadArg->thread_data->count++;
+    if(report)
     {
-        *out_data->out_data->reports = out_data->report;
-        out_data->out_data->reports++;
+        *threadArg->thread_data->reports = report;
+        threadArg->thread_data->reports++;
     }
     else
     {
-        fprintf(stderr, "Error in target %s : %s\n", out_data->url, out_data->error);
+        fprintf(stderr, "Error in target %s : %s\n", threadArg->url, err);
     }
-    if(out_data->out_data->count >= out_data->out_data->size )
-        stop(out_data->ctx);
-    free(out_data);
+    if(threadArg->thread_data->count >= threadArg->thread_data->size)
+    {
+        stop(ctx);
+    }
+    pthread_mutex_unlock(&threadArg->thread_data->mutex);
+    free(arg);
     return NULL;
 }
 
-void* func_thread(void* data, IO_ctx *ctx)
+void* loop_func(Thread_ctx *ctx, void *arg)
 {
-    InThreadPoolArg *in_data = (InThreadPoolArg*) data;
-    char *err;
-    Report *report = scan_server_with_error(in_data->url, &err);
-    OutThreadPoolArg *out_data = malloc(sizeof(OutThreadPoolArg));
-    out_data->out_data = in_data->out_data;
-    out_data->report = report;
-    out_data->url = in_data->url;
-    out_data->ctx = in_data->ctx;
-    out_data->error = err;
-    push(ctx, out_data);
-    free(in_data);
+    ThreadAllData *data = (ThreadAllData*) arg;
+    ThreadArg *arg_t = NULL;
+    int size;
+    if (data->url)
+    {
+        size = data->ctx->size;
+        while (size)
+        {
+            arg_t = malloc(sizeof(ThreadArg));
+            arg_t->url = *(data->url++);
+            arg_t->thread_data = data->ctx;
+            push_in_pool(ctx, func_thread1, arg_t);
+
+            arg_t = NULL;
+            size--;
+        }
+        data->url = NULL;
+    }
     return NULL;
 }
 
 int threading_visit_with_thread_pool(int size, char **urls, Report **out_reports)
 {
-    ThreadConst threadConst = {.reports = out_reports, .count = 0, .size = size};
-    InThreadPoolArg *in_arg = NULL;
-    Thread_ctx *ctx = init(COUNT_THREAD, func_thread);
-    set_output(ctx, output);
+    ThreadConst threadConst     = {.reports = out_reports, .count = 0, .size = size};
+    ThreadAllData threadAllData = {.url = urls, .ctx = &threadConst};
+    Thread_ctx *ctx             = init(COUNT_THREAD, loop_func, &threadAllData);
     puts("Start scanning...");
-
-    for(int i = 0; i < size; ++i)
-    {
-        in_arg = malloc(sizeof(InThreadPoolArg));
-        in_arg->url = urls[i];
-        in_arg->ctx = ctx;
-        in_arg->out_data = &threadConst;
-        push_data(ctx, in_arg);
-        in_arg = NULL;
-    }
     run(ctx);
     while (is_alive(ctx))
     {
     }
-//    while (threadConst.count <= threadConst.size - 1) //tut minus kotic
-//    {
-//    }
-//    stop(ctx);
     destroy(ctx);
     return (int)(threadConst.reports - out_reports);
 }
